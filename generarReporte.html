@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Generar Reporte</title>
+  <link rel="stylesheet" href="lib/css/generarReporte.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="main-layout">
+
+    <!-- Encabezado principal -->
+    <header class="main-header">
+    <a href="perfilReclutador.html" style="text-decoration: none; color: inherit;">
+      <div class="header-left">
+        <img src="lib/img/logo.jpg" alt="Logo" />
+        <span class="title">TalentCheck</span>
+      </div>
+      </a>
+      <div class="header-right">
+         <img src="https://cdn-icons-png.flaticon.com/512/4140/4140037.png" alt="Usuario" class="user-avatar" id="logoutBtn" />
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- Barra lateral -->
+      <aside class="sidebar">
+        <nav class="nav">
+          <a href="perfilReclutador.html"><button class="nav-btn"><i class="fas fa-home"></i></button></a>
+          <a href="candidatos.html"><button class="nav-btn"><i class="fas fa-user-friends"></i></button></a>
+          <a href="generarReporte.html"><button class="nav-btn"><i class="fas fa-chart-bar"></i></button></a>
+          <a href="entrevista.html"><button class="nav-btn"><i class="fas fa-comments"></i></button></a>
+        </nav>
+      </aside>
+
+    <main class="dashboard">
+      <h1>Generar Reporte</h1><br>
+      <form class="reporte-form">
+        <label for="tipo">Tipo de reporte:</label>
+        <select id="tipo" required>
+          <option value="">Selecciona una opción</option>
+          <option value="candidatos">Candidatos en proceso</option>
+          <option value="entrevistas">Entrevistas completadas</option>
+          <option value="examenes">Exámen de Conocimiento</option>
+          <option value="examenes">Exámen Psicométrico</option>
+        </select>
+
+        <label for="fecha-inicio">Fecha de inicio:</label>
+        <input type="date" id="fecha-inicio" required />
+
+        <label for="fecha-fin">Fecha de fin:</label>
+        <input type="date" id="fecha-fin" required />
+
+        <label for="formato">Formato de salida:</label>
+        <select id="formato" required>
+          <option value="pdf">PDF</option>
+          <option value="excel">Excel</option>
+        </select>
+
+        <button type="submit">Generar Reporte</button>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    // Simulación de envío
+    document.querySelector(".reporte-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      alert("Reporte generado exitosamente.");
+    });
+  </script>
+  
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+  } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_I3bIIk0nfGvuDSK0nZ_JcI7ywTP_Rd8",
+    authDomain: "talentchek-t.firebaseapp.com",
+    projectId: "talentchek-t",
+    storageBucket: "talentchek-t.appspot.com",
+    messagingSenderId: "546382065526",
+    appId: "1:546382065526:web:249deb0e90ff9b358bd457",
+    measurementId: "G-WCG5D1N4ZJ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('loginForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        // Evita error si no existen los elementos
+        if (!emailInput || !passwordInput) {
+          alert("No se encontró el input de email o password.");
+          return;
+        }
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+          alert("Por favor completa todos los campos.");
+          return;
+        }
+
+        try {
+          const { user } = await signInWithEmailAndPassword(auth, email, password);
+          if (user.email.toLowerCase() === 'reclutador@gmail.com') {
+            alert("Bienvenido, Reclutador.");
+            window.location.href = "perfilReclutador.html";
+          } else {
+            alert("Inicio de sesión exitoso.");
+            window.location.href = "perfilCandidato.html";
+          }
+        } catch (error) {
+          switch (error.code) {
+            case 'auth/invalid-email':
+              alert('El correo no es válido');
+              break;
+            case 'auth/user-disabled':
+              alert('El usuario ha sido deshabilitado');
+              break;
+            case 'auth/user-not-found':
+              alert('El usuario no existe');
+              break;
+            case 'auth/wrong-password':
+              alert('Contraseña incorrecta');
+              break;
+            default:
+              alert('Error al iniciar sesión: ' + error.message);
+          }
+        }
+      });
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+          alert("Sesión cerrada correctamente.");
+          window.location.href = "index.html";
+        } catch (error) {
+          alert("Error al cerrar sesión: " + error.message);
+        }
+      });
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        console.log("Usuario activo:", user.email);
+      } else {
+        console.log("No hay usuario logueado");
+      }
+    });
+  });
+</script>
+</body>
+</html>

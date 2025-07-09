@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crear Cuenta</title>
+  <link rel="stylesheet" href="lib/css/registrar.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="logo">
+          <img src="lib/img/logo.jpg" alt="Check icon" />
+          <span class="nomSistema">TalentCheck</span>
+        </div>
+      </a>
+
+      <h2>Crear Cuenta</h2>
+      <form id="registroForm">
+        <input type="text" id="nombre" placeholder="Nombre" required />
+        <input type="text" id="apellido" placeholder="Apellido" required />
+        <input type="email" id="emailreg" placeholder="Correo electrónico" required />
+        <input type="password" id="passwordreg" placeholder="Contraseña" required />
+        <button type="submit" id="registro">Registrar</button>
+        <div class="login-inline">
+          <p>¿Ya tienes cuenta?</p>
+          <a href="inicioSesion.html">Iniciar sesión</a>
+        </div>
+      </form>
+    </div>
+    <div class="illustration">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Illustration" />
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js';
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      sendEmailVerification
+    } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_I3bIIk0nfGvuDSK0nZ_JcI7ywTP_Rd8",
+      authDomain: "talentchek-t.firebaseapp.com",
+      projectId: "talentchek-t",
+      storageBucket: "talentchek-t.appspot.com",
+      messagingSenderId: "546382065526",
+      appId: "1:546382065526:web:249deb0e90ff9b358bd457",
+      measurementId: "G-WCG5D1N4ZJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registroForm');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Obtener valores del formulario
+        const nombre = document.getElementById('nombre').value.trim();
+        const apellido = document.getElementById('apellido').value.trim();
+        const email = document.getElementById('emailreg').value.trim();
+        const password = document.getElementById('passwordreg').value;
+
+        // Validaciones
+        if (!nombre || !apellido || !email || !password) {
+          alert("Por favor completa todos los campos.");
+          return;
+        }
+
+        if (password.length < 6) {
+          alert("La contraseña debe tener al menos 6 caracteres.");
+          return;
+        }
+
+        // Mensaje previo
+        alert("Procesando registro de candidato...");
+
+        try {
+          // Crear usuario en Firebase Auth
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+          // Enviar correo de verificación
+          await sendEmailVerification(cred.user);
+
+          // Guardar nombre y apellido en localStorage
+          localStorage.setItem("nombre", nombre);
+          localStorage.setItem("apellido", apellido);
+
+          alert("Candidato registrado correctamente. Se ha enviado un correo de verificación.");
+          form.reset();
+        } catch (error) {
+          const errorCode = error.code;
+
+          if (errorCode === 'auth/email-already-in-use')
+            alert('El correo ya está en uso');
+          else if (errorCode === 'auth/invalid-email')
+            alert('El correo no es válido');
+          else if (errorCode === 'auth/weak-password')
+            alert('La contraseña debe tener al menos 6 caracteres');
+          else
+            alert('Error al registrar: ' + error.message);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

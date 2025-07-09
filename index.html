@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TalentCheck</title>
+  <link rel="stylesheet" href="lib/css/estilos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="main-header">
+    <div class="logo-header">
+      <img src="lib/img/logo.jpg" alt="Logo" />
+      <span class="nomSistema">TalentCheck</span>
+    </div>
+    <div class="header-right">
+      <a href="registrar.html" class="login-icon" title="Iniciar sesión">
+        <i class="fas fa-user-circle"></i>
+      </a>
+    </div>
+  </header>
+
+  <main class="main-content" id="main-content">
+  <h1>Oportunidades laborales</h1>
+  <div class="job-grid">
+
+    <a href="formulario_cv.html" class="job-card">
+      <i class="fas fa-laptop-code"></i>
+      <h2>Desarrollador Web</h2>
+      <p>Construcción y mantenimiento de sitios y aplicaciones web modernas.</p>
+    </a>
+
+    <a href="formulario_cv.html" class="job-card">
+      <i class="fas fa-mobile-alt"></i>
+      <h2>Desarrollador Móvil</h2>
+      <p>Creación de apps para Android y iOS con Flutter o React Native.</p>
+    </a>
+
+    <a href="formulario_cv.html" class="job-card">
+      <i class="fas fa-database"></i>
+      <h2>Administrador de BD</h2>
+      <p>Gestión, respaldo y optimización de bases de datos SQL/NoSQL.</p>
+    </a>
+
+  </div>
+</main>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+  } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_I3bIIk0nfGvuDSK0nZ_JcI7ywTP_Rd8",
+    authDomain: "talentchek-t.firebaseapp.com",
+    projectId: "talentchek-t",
+    storageBucket: "talentchek-t.appspot.com",
+    messagingSenderId: "546382065526",
+    appId: "1:546382065526:web:249deb0e90ff9b358bd457",
+    measurementId: "G-WCG5D1N4ZJ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('loginForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        // Evita error si no existen los elementos
+        if (!emailInput || !passwordInput) {
+          alert("No se encontró el input de email o password.");
+          return;
+        }
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+          alert("Por favor completa todos los campos.");
+          return;
+        }
+
+        try {
+          const { user } = await signInWithEmailAndPassword(auth, email, password);
+          if (user.email.toLowerCase() === 'reclutador@gmail.com') {
+            alert("Bienvenido, Reclutador.");
+            window.location.href = "perfilReclutador.html";
+          } else {
+            alert("Inicio de sesión exitoso.");
+            window.location.href = "perfilCandidato.html";
+          }
+        } catch (error) {
+          switch (error.code) {
+            case 'auth/invalid-email':
+              alert('El correo no es válido');
+              break;
+            case 'auth/user-disabled':
+              alert('El usuario ha sido deshabilitado');
+              break;
+            case 'auth/user-not-found':
+              alert('El usuario no existe');
+              break;
+            case 'auth/wrong-password':
+              alert('Contraseña incorrecta');
+              break;
+            default:
+              alert('Error al iniciar sesión: ' + error.message);
+          }
+        }
+      });
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+          alert("Sesión cerrada correctamente.");
+          window.location.href = "inicioSesion.html";
+        } catch (error) {
+          alert("Error al cerrar sesión: " + error.message);
+        }
+      });
+    }
+
+   let currentUser = null;
+
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+
+    const main = document.getElementById('main-content');
+    if (main) {
+      // Si hay usuario, mostramos el contenido
+      if (user) {
+        main.style.pointerEvents = "auto";
+        main.style.opacity = "1";
+      } else {
+        // Si no hay usuario, ocultamos visualmente pero permitimos clics para detectar interacción
+        main.style.pointerEvents = "auto";
+        main.style.opacity = "0.5"; // efecto visual
+      }
+    }
+  });
+
+  // Escucha clics en los elementos del main
+  document.addEventListener('click', (e) => {
+    const main = document.getElementById('main-content');
+
+    if (!currentUser && main && main.contains(e.target)) {
+      e.preventDefault(); // evita que navegue
+      alert("Debes iniciar sesión para acceder.");
+      window.location.href = "inicioSesion.html";
+    }
+  });
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        console.log("Usuario activo:", user.email);
+      } else {
+        console.log("No hay usuario logueado");
+      }
+    });
+  });
+</script>
+</body>
+</html>
